@@ -1,49 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Loan Utilization Tracker</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        body{
-            font-family: Arial;
-            background:#f2f2f2;
-            padding:20px;
-        }
+<title>Loan Utilization Tracker</title>
 
-        .container{
-            max-width:400px;
-            margin:auto;
-            background:white;
-            padding:20px;
-            border-radius:10px;
-            box-shadow:0 0 10px rgba(0,0,0,0.1);
-        }
+<style>
 
-        input,select,button{
-            width:100%;
-            padding:10px;
-            margin-top:10px;
-            border-radius:5px;
-            border:1px solid #ccc;
-        }
+body{
+font-family:Arial;
+background:#f2f2f2;
+padding:20px;
+text-align:center;
+}
 
-        button{
-            background:#007bff;
-            color:white;
-            border:none;
-            cursor:pointer;
-        }
+.container{
+max-width:400px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
 
-        button:hover{
-            background:#0056b3;
-        }
+input,select,button{
+width:100%;
+padding:10px;
+margin-top:10px;
+border-radius:5px;
+border:1px solid #ccc;
+}
 
-        .result{
-            margin-top:15px;
-            font-weight:bold;
-        }
-    </style>
+button{
+background:#007bff;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+.result{
+margin-top:15px;
+font-weight:bold;
+}
+
+</style>
+
 </head>
 
 <body>
@@ -52,17 +52,20 @@
 
 <h2>Loan Utilization Tracker</h2>
 
-<h3>Create </h3>
+<h3>Bank Loan Amount</h3>
 
-<input type="number" id="loanAmount" placeholder="Loan Amount">
+<p><b>₹ 3,000,000</b></p>
+
+<h3>Select Loan Purpose</h3>
 
 <select id="purpose">
 <option>Education</option>
+<option>Health</option>
 <option>Business</option>
 <option>Home</option>
 </select>
 
-<button onclick="createLoan()">Create Loan</button>
+<button onclick="createLoan()">Activate Loan</button>
 
 <hr>
 
@@ -72,10 +75,15 @@
 
 <select id="category">
 <option>Books</option>
+<option>Hospital</option>
 <option>Business Expense</option>
 <option>Shopping</option>
 <option>Other</option>
 </select>
+
+<h4>Upload Proof</h4>
+
+<input type="file" id="proof">
 
 <button onclick="addSpending()">Add Spending</button>
 
@@ -87,53 +95,85 @@
 
 async function createLoan(){
 
-    const loanAmount = document.getElementById("loanAmount").value
-    const purpose = document.getElementById("purpose").value
+const purpose = document.getElementById("purpose").value
 
-    const response = await fetch("http://localhost:3000/loan",{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-            loanAmount: parseInt(loanAmount),
-            purpose: purpose
-        })
-    })
+const response = await fetch("http://localhost:3000/loan",{
 
-    const data = await response.json()
+method:"POST",
 
-    document.getElementById("output").innerHTML = "Loan Created Successfully"
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+purpose:purpose
+})
+
+})
+
+const data = await response.json()
+
+document.getElementById("output").innerHTML=
+
+"Loan Activated<br>"+
+
+"Loan Amount: ₹ "+data.loanAmount+
+
+"<br>Customer Score: "+data.customerScore
+
 }
+
 
 
 async function addSpending(){
 
-    const amount = document.getElementById("spendAmount").value
-    const category = document.getElementById("category").value
+const amount = document.getElementById("spendAmount").value
+const category = document.getElementById("category").value
+const proofFile = document.getElementById("proof").files[0]
 
-    const response = await fetch("http://localhost:3000/spend",{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify({
-            amount: parseInt(amount),
-            category: category
-        })
-    })
+let proof = false
 
-    const data = await response.json()
+if(proofFile){
+proof = true
+}
 
-    document.getElementById("output").innerHTML =
-        "Total Spent: ₹ " + data.totalSpent +
-        "<br>Utilization: " + data.utilization.toFixed(2) + "%" +
-        "<br>" + data.warning
+const response = await fetch("http://localhost:3000/spend",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+amount:parseInt(amount),
+category:category,
+proof:proof
+})
+
+})
+
+const data = await response.json()
+
+document.getElementById("output").innerHTML=
+
+"Loan Amount: ₹ "+data.loanAmount+
+
+"<br>Total Spent: ₹ "+data.totalSpent+
+
+"<br>Utilization: "+data.utilization.toFixed(2)+"%"+
+
+"<br>Status: "+data.usageStatus+
+
+"<br>Verification: "+data.verificationStatus+
+
+"<br>"+data.warning+
+
+"<br>Customer Score: "+data.customerScore
+
 }
 
 </script>
 
 </body>
 </html>
-```
-
